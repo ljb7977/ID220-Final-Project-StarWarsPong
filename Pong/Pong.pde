@@ -24,9 +24,9 @@ void setup()
   
   println(Serial.list());
   //delay(10000);
-  myPort = new Serial(this, Serial.list()[0], 38400);
-  myPort.bufferUntil(10); 
+  
   sendPort = new Serial(this, Serial.list()[1], 38400);
+  sendPort.clear();
   sendPort.bufferUntil(10);
   
   Fisica.init(this);
@@ -57,6 +57,10 @@ void setup()
   world.add(comet);
   world.add(gauge1);
   world.add(gauge2);
+
+  myPort = new Serial(this, Serial.list()[0], 38400);
+  myPort.clear();
+  myPort.bufferUntil(10);
 }
 
 void draw()
@@ -80,6 +84,7 @@ void draw()
     if(!comet.catcher.gravityOn){ //when the catcher is turned off
       comet.catcher = null;
       comet.joint.removeFromWorld();
+      sendPort.write("r"); //send serial message (boom vibe)
     }
   }
 
@@ -138,7 +143,6 @@ void keyReleased()
 }
 
 void serialEvent(Serial p){
-  println(p == myPort);
   String s = p.readStringUntil(10);
   String[] list;
   if(s != null){
@@ -158,7 +162,7 @@ void serialEvent(Serial p){
     } else {
       if(p1.buttonPushed){
         p1.buttonPushed = false;
-        p1.turnOffGravity();  
+        p1.turnOffGravity();
       }
     }
   }

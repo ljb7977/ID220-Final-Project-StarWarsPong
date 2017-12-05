@@ -2,7 +2,7 @@ class Star extends FCircle{
   
   float y = height/2, energy = 400, maxenergy = 400;
   boolean gravityOn, buttonPushed;
-  long onTimeStamp;
+  long onTimeStamp, vibeTimeStamp;
   float force = 40;
 
   final int maxTime = 7000;
@@ -21,9 +21,6 @@ class Star extends FCircle{
 
   void setY(float val)
   {
-    //println(val);
-    //if(Float.isNaN(val))
-    //  return;
     if(val >= height-100 || val <= 100)
       return;
     y = val;
@@ -37,6 +34,10 @@ class Star extends FCircle{
       onTime = constrain(onTime, 0, maxTime); //5 sec limit
       setColorHSV((int)map(onTime, 0, maxTime, 180, 360), 1, 1);
       energy -= 1;
+
+      if(millis()-vibeTimeStamp >= 600){
+        
+      }
       //send serial vibe
     } else {
       if(energy + 0.7 <= maxenergy)
@@ -50,6 +51,7 @@ class Star extends FCircle{
   void turnOnGravity()
   {
     onTimeStamp = millis();
+    vibeTimeStamp = millis();
     gravityOn = true;
   }
 
@@ -57,7 +59,7 @@ class Star extends FCircle{
   {
     gravityOn = false;
     setColorHSV(180, 1, 1);
-    //send serial message (boom vibe)
+    
   }
 
   void setColorHSV(int h, double s, double v) {
@@ -108,8 +110,14 @@ class Star extends FCircle{
     float red=constrain(255*(float)r,0,255);
     float green=constrain(255*(float)g,0,255);
     float blue=constrain(255*(float)b,0,255);
-    //println(red, green, blue);
+
     setFill(red, green, blue);
+    
+    /*sendPort.write('c');
+    sendPort.write(byte(int(red)));
+    sendPort.write(int(green));
+    sendPort.write(int(blue));
+    */
     String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
     //String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(blue);
     println(message);
