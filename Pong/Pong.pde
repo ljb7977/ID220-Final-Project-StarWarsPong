@@ -1,7 +1,7 @@
 import fisica.*;
 import processing.serial.*;
 
-Serial myPort;
+Serial myPort, sendPort;
 
 FWorld world;
 
@@ -14,18 +14,20 @@ boolean up, down;
 void setup()
 {
   
-  fullScreen();
-  //size(1280, 720);
+  //fullScreen();
+  size(1280, 720);
   smooth();
-  frameRate(120);
+  frameRate(60);
   background(0);
   rectMode(CENTER);
   noStroke();
-
+  
   println(Serial.list());
-  delay(10000);
-  myPort = new Serial(this, Serial.list()[0], 9600);
+  //delay(10000);
+  myPort = new Serial(this, Serial.list()[0], 38400);
   myPort.bufferUntil(10); 
+  sendPort = new Serial(this, Serial.list()[1], 38400);
+  sendPort.bufferUntil(10);
   
   Fisica.init(this);
   world = new FWorld();
@@ -136,15 +138,19 @@ void keyReleased()
 }
 
 void serialEvent(Serial p){
+  println(p == myPort);
   String s = p.readStringUntil(10);
   String[] list;
   if(s != null){
     list = s.split(" ");
     println(list);
-    if(list.length != 3)
+    if(list.length != 2)
       return;
-    p1.setY(map(float(list[1]), 2, 30, 100, height-100));
-    if(list[2].charAt(0) == '1'){
+    float temp = float(list[0]);
+    if(Float.isNaN(temp))
+      return;
+    p1.setY(map(temp, 2, 30, 100, height-100));
+    if(list[1].charAt(0) == '1'){
       if(p1.buttonPushed == false){
         p1.turnOnGravity();
         p1.buttonPushed = true;

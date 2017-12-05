@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h>
-
 #define num 5
 #define motorPin 6
 
@@ -7,14 +5,13 @@ const int redPin = 11;
 const int greenPin = 10;
 const int bluePin = 9;
 
-float readings[2][num];
-int readindex[2];
-float total[2];
-float avg[2];
+float readings[num];
+int readindex;
+float total, avg;
 bool gravity, prev_gravity;
 
-unsigned long int trigPin[2] = {8, 13};
-unsigned long int echoPin[2] = {7, 12};
+unsigned long int trigPin = 13;
+unsigned long int echoPin = 12;
 
 unsigned long timestamp;
 unsigned long interval = 300;

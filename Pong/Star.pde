@@ -113,6 +113,6 @@ class Star extends FCircle{
     String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
     //String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(blue);
     println(message);
-    myPort.write(message);
+    sendPort.write(message);
   }
 }
