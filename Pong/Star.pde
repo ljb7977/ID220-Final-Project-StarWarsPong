@@ -15,6 +15,7 @@ class Star extends FCircle{
     setRotatable(false);
     setStatic(true);
     setBullet(true);
+    setGrabbable(false);
     setName(name);
     setColorHSV(180, 1, 1);
   }
@@ -33,7 +34,7 @@ class Star extends FCircle{
       int onTime = (int)(millis() - onTimeStamp);
       onTime = constrain(onTime, 0, maxTime); //5 sec limit
       setColorHSV((int)map(onTime, 0, maxTime, 180, 360), 1, 1);
-      energy -= 1;
+      energy -= 1;  
       
       int interval = (int)map(onTime, 0, 7000, 500, 150);
       int intensity = (int)map(onTime, 0, 7000, 100, 200);

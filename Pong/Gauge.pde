@@ -15,10 +15,6 @@ class Gauge extends FBox{
   {
     Star parent = (Star)getParent();
     resize();
-    /*
-    if(parent.energy > 0)
-      parent.energy -= 1;
-    */
   }
 
   void resize()

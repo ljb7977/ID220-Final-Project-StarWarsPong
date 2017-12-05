@@ -13,17 +13,14 @@ boolean up, down;
 
 void setup()
 {
-  
   //fullScreen();
   size(1280, 720);
   smooth();
   frameRate(60);
   background(0);
-  rectMode(CENTER);
   noStroke();
   
   println(Serial.list());
-  //delay(10000);
   
   sendPort = new Serial(this, Serial.list()[1], 38400);
   sendPort.clear();
@@ -48,7 +45,6 @@ void setup()
   gauge2 = new Gauge(width-50, 50, "gauge2", p2);
 
   comet = new Comet();
-  comet.respawn();
   
   world.add(g1);
   world.add(g2);
@@ -61,6 +57,8 @@ void setup()
   myPort = new Serial(this, Serial.list()[0], 38400);
   myPort.clear();
   myPort.bufferUntil(10);
+
+  newRound();
 }
 
 void draw()
@@ -68,10 +66,8 @@ void draw()
   background(0);
   if(up){
      p2.setY(p2.y-5);
-     println(p2.y);
   } else if (down){
      p2.setY(p2.y+5);
-     println(p2.y);
   }
   
   p1.step();
@@ -86,6 +82,7 @@ void draw()
         sendPort.write("r"); //send serial message (boom vibe)
       comet.catcher = null;
       comet.joint.removeFromWorld();
+      comet.joint = null;
     }
   }
 
@@ -104,20 +101,45 @@ void draw()
   gauge1.step();
   gauge2.step();
 
+  if(comet.joint != null){
+    comet.joint.step();
+  }
+
   world.step();
   world.draw();
 
   if(comet.outOfBoard()){
     println("Out");
     delay(2000);
-    comet.respawn();
+    newRound();
   }
+
+  if(comet.isTouchingBody(p1)){
+    println("Collide");
+    delay(2000);
+    p1.maxenergy += 10;
+    newRound();
+  }
+  if(comet.isTouchingBody(p2)){
+    println("Collide");
+    delay(2000);
+    p2.maxenergy += 10;
+    newRound();
+  }
+}
+
+void newRound()
+{
+  p1.energy = p1.maxenergy;
+  p2.energy = p2.maxenergy;
+  comet.respawn();
 }
 
 void keyPressed()
 {
   if(key == ' '){
-    p2.turnOnGravity();
+    if(p2.gravityOn == false)
+      p2.turnOnGravity();
   }
 
   if(key == CODED){
@@ -168,29 +190,3 @@ void serialEvent(Serial p){
     }
   }
 }
-
-/*
-void contactStarted(FContact contact)
-{
-   if(contact.contains("star1", "comet")){
-     println("collide");
-     delay(2000);
-     comet.respawn();
-   }
-}
-*/
-/*
-void contactPersisted(FContact contact)
-{
-   if(contact.contains("gravity1", "comet") && g1.on){
-     //println("contact persisted");
-   }
-}
-
-void contactEnded(FContact contact)
-{
-  if(contact.contains("gravity1", "comet") && g1.on){
-     println("contact end");
-   }
-}
-*/

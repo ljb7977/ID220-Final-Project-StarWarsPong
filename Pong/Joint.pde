@@ -15,13 +15,28 @@ class Joint extends FRevoluteJoint{
     } else {
       direction = 1;
     }
-    c.setAngularVelocity(v.mag()/10);
+    //c.setAngularVelocity(v.mag()/10);
+    c.setAngularVelocity(0);
     //println(v.mag()/10);
     
     setEnableMotor(true);
     setEnableLimit(false);
-    setMaxMotorTorque(50);
-    setMotorSpeed(direction*100);
+    setMaxMotorTorque(10);
     setDrawable(false);
+  }
+
+  void step()
+  {
+    Star p = (Star)getBody1();
+    int onTime = (int)(millis() - p.onTimeStamp);
+
+    println("onTime: "+str(onTime));
+
+    onTime = constrain(onTime, 0, p.maxTime); //5 sec limit
+    float speed = map(onTime, 0, p.maxTime, 0, 600);
+    println("speed: "+str(direction * speed));
+
+    setMaxMotorTorque(speed);
+    setMotorSpeed(direction *speed);
   }
 }

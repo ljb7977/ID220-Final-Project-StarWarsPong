@@ -6,6 +6,7 @@ class Gravity extends FCircle{
     setSensor(true);
     setRotatable(false);
     setDrawable(false);
+    setGrabbable(false);
     setBullet(true);
     setName(name);
   }
