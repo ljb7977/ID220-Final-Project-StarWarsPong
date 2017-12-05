@@ -34,11 +34,16 @@ class Star extends FCircle{
       onTime = constrain(onTime, 0, maxTime); //5 sec limit
       setColorHSV((int)map(onTime, 0, maxTime, 180, 360), 1, 1);
       energy -= 1;
-
-      if(millis()-vibeTimeStamp >= 600){
-        
+      
+      int interval = (int)map(onTime, 0, 7000, 500, 150);
+      int intensity = (int)map(onTime, 0, 7000, 100, 200);
+      if(millis()-vibeTimeStamp >= interval){ //send serial vibe
+        vibeTimeStamp = millis();
+        String message = "v "+ str(interval/2)+" "+str(intensity);
+        println(message);
+        if(getName().equals("star1"))
+        sendPort.write(message);
       }
-      //send serial vibe
     } else {
       if(energy + 0.7 <= maxenergy)
         energy += 0.7;
@@ -59,7 +64,6 @@ class Star extends FCircle{
   {
     gravityOn = false;
     setColorHSV(180, 1, 1);
-    
   }
 
   void setColorHSV(int h, double s, double v) {
@@ -113,14 +117,9 @@ class Star extends FCircle{
 
     setFill(red, green, blue);
     
-    /*sendPort.write('c');
-    sendPort.write(byte(int(red)));
-    sendPort.write(int(green));
-    sendPort.write(int(blue));
-    */
     String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
-    //String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(blue);
     println(message);
+    if(getName().equals("star1"))
     sendPort.write(message);
   }
 }

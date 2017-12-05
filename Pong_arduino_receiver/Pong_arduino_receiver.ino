@@ -19,19 +19,12 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
-  //interval = map(pressure, 100, 600, 300, 75);
-  //motorspeed = map(pressure, 100, 600, 100, 200);
-  if(millis()-timestamp >= interval){
-    timestamp = millis();
-    if(motorOn)
+  if(motorOn){
+    if(millis()-timestamp >= interval){
       analogWrite(motorPin, 0);
-    else
-      //analogWrite(motorPin, motorspeed);
-    motorOn = !motorOn;
+      motorOn = false;
+    }
   }
-  
 }
 
 void serialEvent()
@@ -48,6 +41,13 @@ void serialEvent()
       analogWrite(bluePin, b);
     } else if (op == 'r'){
       analogWrite(motorPin, 255);
+      timestamp = millis();
+      interval = 300;
+      motorOn = true;
+    } else if (op == 'v'){
+      interval = Serial.parseInt();
+      motorspeed = Serial.parseInt();
+      analogWrite(motorPin, motorspeed);
       timestamp = millis();
       motorOn = true;
     }

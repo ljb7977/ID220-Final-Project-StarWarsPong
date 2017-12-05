@@ -82,9 +82,10 @@ void draw()
 
   if(comet.catcher != null){
     if(!comet.catcher.gravityOn){ //when the catcher is turned off
+      if(comet.catcher == p1)
+        sendPort.write("r"); //send serial message (boom vibe)
       comet.catcher = null;
       comet.joint.removeFromWorld();
-      sendPort.write("r"); //send serial message (boom vibe)
     }
   }
 
