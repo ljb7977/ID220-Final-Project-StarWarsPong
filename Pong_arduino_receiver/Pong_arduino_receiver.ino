@@ -8,10 +8,10 @@ unsigned long timestamp;
 unsigned long interval = 300;
 unsigned long motorspeed = 100;
 
-bool motorOn, next_motorOn;
+bool motorOn;
 
 void setup() {
-  Serial.begin(38400);
+  Serial.begin(57600);
   timestamp = millis();
   analogWrite(redPin, 0);
   analogWrite(greenPin, 255);
@@ -31,7 +31,6 @@ void serialEvent()
 {
   if(Serial.available()){
     char op = (char)Serial.read();
-    
     if(op == 'c'){
       byte r = Serial.parseInt();
       byte g = Serial.parseInt();
@@ -50,6 +49,9 @@ void serialEvent()
       analogWrite(motorPin, motorspeed);
       timestamp = millis();
       motorOn = true;
+    } else if (op == 's'){
+      analogWrite(motorPin, 0);
+      motorOn = false;
     }
   }
 }

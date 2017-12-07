@@ -7,7 +7,7 @@ int readindex;
 bool gravity;
 
 void setup() {
-  Serial.begin(38400);
+  Serial.begin(57600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 }
@@ -43,6 +43,6 @@ void loop() {
 
   Serial.print(gravity);
   Serial.println("");
-  delay(50);
+  delay(30);
 }
 

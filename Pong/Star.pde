@@ -5,6 +5,8 @@ class Star extends FCircle{
   long onTimeStamp, vibeTimeStamp;
   float force = 40;
 
+  int score=0;
+
   final int maxTime = 7000;
 
   Star(int position, String name){
@@ -22,7 +24,7 @@ class Star extends FCircle{
 
   void setY(float val)
   {
-    if(val >= height-100 || val <= 100)
+    if(val >= height-120 || val <= 120)
       return;
     y = val;
   }
@@ -65,6 +67,8 @@ class Star extends FCircle{
   {
     gravityOn = false;
     setColorHSV(180, 1, 1);
+    sendPort.write("s");
+    println("s");
   }
 
   void setColorHSV(int h, double s, double v) {

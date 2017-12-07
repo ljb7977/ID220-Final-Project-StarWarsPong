@@ -14,19 +14,24 @@ class Comet extends FCircle{
     catcher = null;
   }
 
-  boolean outOfBoard()
+  int outOfBoard()
   {
     if(catcher != null)
-      return false;
-    if(getX() <= -10 || getX() >= width+10)
-      return true;
-    return false;
+      return 0;
+    if(getX() <= -10)
+      return 2;
+    if(getX() >= width+10)
+      return 1;
+    return 0;
   }
 
   void respawn()
   {
     setPosition(width/2, height/2);
-    setVelocity(-100, 10); 
+    int rand = int(random(0, 2));
+    if(rand == 0)
+      rand = -1;
+    setVelocity(random(200, 300) * rand, random(-10, 10)); 
     //setVelocity(0,0);
     setRotation(0);
     setAngularVelocity(0);
