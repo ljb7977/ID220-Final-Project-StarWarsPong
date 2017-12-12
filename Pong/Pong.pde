@@ -78,7 +78,7 @@ void setup()
   myPort.clear();
   myPort.bufferUntil(10);
 
-  gamestate = ready;
+  gamestate = main;
 
   reset();
   comet.setVelocity(0,0);
@@ -256,14 +256,8 @@ void draw()
     g1.step();
     g2.step();
 
-    /*
-    gauge1.step();
-    gauge2.step();
-    */
-
     gauge1.setDrawable(false);
     gauge2.setDrawable(false);
-
     comet.setDrawable(false);
 
     world.step();
@@ -288,47 +282,19 @@ void draw()
     if(messageTimeStamp != 0){
       if(millis() - messageTimeStamp <= 3000){
         if(win == 1){
-          pushMatrix();
-          translate(300, height/2);
-          rotate(radians(90));
-
           textSize(60);
-
-          text("p1 win!", 0, 0);
-          popMatrix();
-
-          pushMatrix();
-          translate(width-300, height/2);
-          rotate(radians(270));
-
-          textSize(60);
-
-          text("p1 win!", 0, 0);
-          popMatrix();
+          text("p1 win!", width/2, height/2);
         } else if (win == 2){
-          pushMatrix();
-          translate(300, height/2);
-          rotate(radians(90));
-
           textSize(60);
-          text("p2 win!", 0, 0);
-          popMatrix();
-
-          pushMatrix();
-          translate(width-300, height/2);
-          rotate(radians(270));
-
-          textSize(60);
-          text("p2 win!", 0, 0);
-          popMatrix();
+          text("p2 win!", width/2, height/2);
         }
       } else {
         messageTimeStamp = 0;
         gamestate = ready;
+        reset();
+        p1.score = 0;
+        p2.score = 0;
       }
-      reset();
-      p1.score = 0;
-      p2.score = 0;
       return;
     }
   }

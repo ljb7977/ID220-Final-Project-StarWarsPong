@@ -5,7 +5,7 @@ class Star extends FCircle{
   long onTimeStamp, vibeTimeStamp;
   float force = 40;
 
-  int score=0;
+  int score=90;
 
   final int maxTime = 7000;
 
