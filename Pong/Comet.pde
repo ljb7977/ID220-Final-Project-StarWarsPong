@@ -3,6 +3,8 @@ class Comet extends FCircle{
   Star catcher;
   Joint joint;
 
+  PImage img;
+
   Comet(){
     super(20);
     setPosition(width/2, height/2);
@@ -12,6 +14,17 @@ class Comet extends FCircle{
     setDamping(0);
     setName("comet");
     catcher = null;
+
+    setDrawable(false);
+
+    //render();
+    img = loadImage("comet.png");
+    img.resize(30, 30);
+  }
+
+  void step()
+  {
+    image(img, getX(), getY());
   }
 
   int outOfBoard()

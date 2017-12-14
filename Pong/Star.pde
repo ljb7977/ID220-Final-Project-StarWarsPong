@@ -2,9 +2,15 @@ class Star extends FCircle{
   float y = height/2, energy = 400, maxenergy = 400, force = 40;
   boolean gravityOn, buttonPushed;
   long onTimeStamp, vibeTimeStamp;
-  int score=30;
+  int score=0;
 
   int id;
+
+  PImage img;
+
+  float red=255;
+  float green=255;
+  float blue=255;
 
   final int maxTime = 7000;
 
@@ -17,13 +23,18 @@ class Star extends FCircle{
     setStatic(true);
     setBullet(true);
     setGrabbable(false);
+    setNoStroke();
+
+    setDrawable(false);
     this.id = id;
+    img = loadImage("star.png");
+    img.resize(100, 100);
     setColorHSV(180, 1, 1);
   }
 
   void setY(float val)
   {
-    if(val >= height-120 || val <= 120)
+    if(val > height-120 || val < 120)
       return;
     y = val;
   }
@@ -43,8 +54,6 @@ class Star extends FCircle{
         vibeTimeStamp = millis();
         String message = str(this.id)+" 2 "+ str(interval/2)+" "+str(intensity);
         print_and_write(message);
-        //println(message);
-        //sendPort.write(message);
       }
     } else {
       if(energy + 0.7 <= maxenergy)
@@ -53,6 +62,9 @@ class Star extends FCircle{
     if(energy <= 0){
       turnOffGravity();
     }
+    tint(red, green, blue);
+    image(img, getX(), getY());
+    noTint();
   }
 
   void turnOnGravity()
@@ -117,15 +129,13 @@ class Star extends FCircle{
       b = qv;
       break;
     }
-    float red=constrain(255*(float)r,0,255);
-    float green=constrain(255*(float)g,0,255);
-    float blue=constrain(255*(float)b,0,255);
+    red=constrain(255*(float)r,0,255);
+    green=constrain(255*(float)g,0,255);
+    blue=constrain(255*(float)b,0,255);
 
-    setFill(red, green, blue);
+    //setFill(red, green, blue);
     
     String message = str(this.id)+" 0 "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
-    //println(message);
-    //sendPort.write(message);
     print_and_write(message);
   }
 }

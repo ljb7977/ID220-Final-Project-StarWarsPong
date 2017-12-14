@@ -1,7 +1,7 @@
-const int motorPin[2] = {5,6};
-const int redPin[2] = {10, 13};
-const int greenPin[2] = {9, 12};
-const int bluePin[2] = {8, 11};
+const int motorPin[2] = {6,5};
+const int redPin[2] = {13, 10};
+const int greenPin[2] = {12, 9};
+const int bluePin[2] = {11, 8};
 
 unsigned long timestamp[2];
 unsigned long interval[2] = {300, 300};

@@ -2,7 +2,7 @@ class Gravity extends FCircle{
   Gravity(String name, Star parent){
     super(200);
     setParent(parent);
-    setFill(128);
+    setFill(128, 128);
     setSensor(true);
     setRotatable(false);
     setDrawable(false);

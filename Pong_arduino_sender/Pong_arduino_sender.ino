@@ -1,8 +1,8 @@
 #define num 10
 
-const int echoPin[2] = {10, 12};
-const int trigPin[2] = {11, 13};
-const int pressPin[2] = {A0, A1};
+const int echoPin[2] = {12, 10};
+const int trigPin[2] = {13, 11};
+const int pressPin[2] = {A1, A0};
 
 float readings[2][num], total[2];
 int readindex;
@@ -38,7 +38,7 @@ void loop() {
     if(readindex >= num)
       readindex = 0;
 
-    avg = total[i]/num;
+    avg = 32-total[i]/num*2;
     float val = constrain(avg, 2, 30);
 
     Serial.print(i+1);

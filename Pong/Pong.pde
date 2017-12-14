@@ -26,7 +26,7 @@ int winscore = 50;
 
 void setup()
 {
-  fullScreen(P3D, 2);
+  fullScreen(2);
   //size(1280, 720);
   smooth();
   frameRate(60);
@@ -37,7 +37,6 @@ void setup()
   imageMode(CENTER);
   
   logo = loadImage("logo.png");
-  //logo.resize(335, 271);
   
   PFont font;
   font = createFont("SF Distant Galaxy.ttf", 64);
@@ -82,7 +81,7 @@ void setup()
   myPort.clear();
   myPort.bufferUntil(10);
 
-  gamestate = main;
+  gamestate = ready;
 
   reset();
   comet.setVelocity(0,0);
@@ -142,12 +141,6 @@ void draw()
        p2.setY(p2.y+5);
     }
     
-    p1.step();
-    p2.step();
-
-    g1.step();
-    g2.step();
-
     if(comet.catcher != null){
       if(!comet.catcher.gravityOn){ //when the catcher is turned off
         if(comet.catcher == p1)
@@ -174,6 +167,10 @@ void draw()
       println("catched by g2");
     }
 
+    
+    g1.step();
+    g2.step();
+
     gauge1.step();
     gauge2.step();
 
@@ -184,6 +181,10 @@ void draw()
     world.step();
     world.draw();
 
+    comet.step();
+    p1.step();
+    p2.step();
+
     if((win = comet.outOfBoard()) != 0){
       if(win == 1){
         p1.score+=10;
@@ -192,17 +193,12 @@ void draw()
       }
       println("Out");
       print_and_write(str(win)+" 1");
-      //sendPort.write(str(win)+" 1");
-      //println(str(win)+" r");
       messageTimeStamp = millis();
     }
 
     if(comet.isTouchingBody(p1)){
       println("Collide");
       print_and_write("1 1");
-      //sendPort.write("1 1");
-      //println("1 r");
-
       win = 2;
       p2.score+=10;
 
@@ -212,8 +208,6 @@ void draw()
     if(comet.isTouchingBody(p2)){
       println("Collide");
       print_and_write("2 1");
-      //sendPort.write("2 1");
-      //println("2 r");
 
       win = 1;
       p1.score+=10;
@@ -236,7 +230,11 @@ void draw()
        p2.setY(p2.y+5);
     }
 
-    image(logo, width/2, 300);
+    pushMatrix();
+    translate(width/2, 880);
+    rotate(radians(180));
+    image(logo, 0, 0);
+    popMatrix();
 
     pushMatrix();
 
@@ -260,10 +258,7 @@ void draw()
 
     p1.energy = p1.maxenergy;
     p2.energy = p2.maxenergy;
-
-    p1.step();
-    p2.step();
-
+    
     g1.step();
     g2.step();
 
@@ -274,20 +269,20 @@ void draw()
     world.step();
     world.draw();
 
+    p1.step();
+    p2.step();
+
     if(p1.gravityOn && p2.gravityOn){
       if(millis()-p1.onTimeStamp > p1.maxTime && millis()-p2.onTimeStamp > p2.maxTime){
         reset();
         gauge1.setDrawable(true);
         gauge2.setDrawable(true);
-        comet.setDrawable(true);
+
         gamestate = main;
         p1.turnOffGravity();
         p2.turnOffGravity();
 
-        //sendPort.write("1 1");
-        //println("1 r");
         print_and_write("1 1");
-        reset();
       }
     }
   } else if (gamestate == gameover){
@@ -325,6 +320,8 @@ void draw()
       } else {
         messageTimeStamp = 0;
         gamestate = ready;
+        p1.energy = p1.maxenergy;
+        p2.energy = p2.maxenergy;
         reset();
         p1.score = 0;
         p2.score = 0;
@@ -371,14 +368,16 @@ void serialEvent(Serial p){
   String[] list;
   if(s != null){
     list = s.split(" ");
-    //println(list);
+    println(list);
     if(list.length != 3)
       return;
 
     if(int(list[0]) == 1){
       player = p1;
+      println("p1");
     } else if (int(list[0]) == 2){
       player = p2;
+      println("p2");
     }
 
     float dist = float(list[1]);
