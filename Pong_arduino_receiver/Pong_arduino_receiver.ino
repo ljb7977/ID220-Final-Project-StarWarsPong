@@ -1,28 +1,30 @@
-#define motorPin 6
+const int motorPin[2] = {5,6};
+const int redPin[2] = {10, 13};
+const int greenPin[2] = {9, 12};
+const int bluePin[2] = {8, 11};
 
-const int redPin = 11;
-const int greenPin = 10;
-const int bluePin = 9;
+unsigned long timestamp[2];
+unsigned long interval[2] = {300, 300};
 
-unsigned long timestamp;
-unsigned long interval = 300;
-unsigned long motorspeed = 100;
-
-bool motorOn;
+bool motorOn[2];
 
 void setup() {
   Serial.begin(57600);
-  timestamp = millis();
-  analogWrite(redPin, 0);
-  analogWrite(greenPin, 255);
-  analogWrite(bluePin, 255);
+  for(int i =0; i<2; i++){
+    timestamp[i] = millis();
+    analogWrite(redPin[i], 0);
+    analogWrite(greenPin[i], 255);
+    analogWrite(bluePin[i], 255);
+  }
 }
 
 void loop() {
-  if(motorOn){
-    if(millis()-timestamp >= interval){
-      analogWrite(motorPin, 0);
-      motorOn = false;
+  for(int i=0;i<2;i++){
+    if(motorOn[i]){
+      if(millis()-timestamp[i] >= interval[i]){
+        analogWrite(motorPin[i], 0);
+        motorOn[i] = false;
+      }
     }
   }
 }
@@ -30,28 +32,41 @@ void loop() {
 void serialEvent()
 {
   if(Serial.available()){
-    char op = (char)Serial.read();
-    if(op == 'c'){
+    char c = (char)Serial.read();
+
+    if(c != 'm')
+      return;
+
+    int num = Serial.parseInt();
+
+    if(num == 0)
+      return;
+    num--;
+
+    int op = Serial.parseInt();
+
+    if(op == 0){
       byte r = Serial.parseInt();
       byte g = Serial.parseInt();
       byte b = Serial.parseInt();
-      analogWrite(redPin, r);
-      analogWrite(greenPin, g);
-      analogWrite(bluePin, b);
-    } else if (op == 'r'){
-      analogWrite(motorPin, 255);
-      timestamp = millis();
-      interval = 300;
-      motorOn = true;
-    } else if (op == 'v'){
-      interval = Serial.parseInt();
+      analogWrite(redPin[num], r);
+      analogWrite(greenPin[num], g);
+      analogWrite(bluePin[num], b);
+    } else if (op == 1){ //r
+      analogWrite(motorPin[num], 255);
+      timestamp[num] = millis();
+      interval[num] = 300;
+      motorOn[num] = true;
+    } else if (op == 2){ //v
+      int motorspeed;
+      interval[num] = Serial.parseInt();
       motorspeed = Serial.parseInt();
-      analogWrite(motorPin, motorspeed);
-      timestamp = millis();
-      motorOn = true;
-    } else if (op == 's'){
-      analogWrite(motorPin, 0);
-      motorOn = false;
+      analogWrite(motorPin[num], motorspeed);
+      timestamp[num] = millis();
+      motorOn[num] = true;
+    } else if (op == 3){ //s
+      analogWrite(motorPin[num], 0);
+      motorOn[num] = false;
     }
   }
 }

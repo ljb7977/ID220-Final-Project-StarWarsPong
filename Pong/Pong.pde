@@ -1,6 +1,8 @@
 import fisica.*;
 import processing.serial.*;
 
+boolean debug = true;
+
 Serial myPort, sendPort;
 FWorld world;
 
@@ -15,7 +17,7 @@ final int main = 1;
 final int ready = 2;
 final int gameover = 3;
 
-PImage logo;
+PImage logo, bg;
 
 long messageTimeStamp;
 
@@ -24,11 +26,13 @@ int winscore = 50;
 
 void setup()
 {
-  fullScreen(2);
+  fullScreen(P3D, 2);
   //size(1280, 720);
   smooth();
   frameRate(60);
-  background(0);
+  bg = loadImage("bg.jpg");
+  bg.resize(width, height);
+  background(bg);
   noStroke();
   imageMode(CENTER);
   
@@ -55,8 +59,8 @@ void setup()
   world.setEdgesFriction(0);
   world.setEdgesRestitution(1);
 
-  p1 = new Star(100, "star1");
-  p2 = new Star(width-100, "star2");
+  p1 = new Star(100, 1);
+  p2 = new Star(width-100, 2);
 
   g1 = new Gravity("gravity1", p1);
   g2 = new Gravity("gravity2", p2);
@@ -130,7 +134,7 @@ void draw()
       reset();
       return;
     }
-    background(0);
+    background(bg);
 
     if(up){
        p2.setY(p2.y-5);
@@ -147,11 +151,15 @@ void draw()
     if(comet.catcher != null){
       if(!comet.catcher.gravityOn){ //when the catcher is turned off
         if(comet.catcher == p1)
-          sendPort.write("r"); //send serial message (boom vibe)
+          print_and_write("1 1");
+          //sendPort.write("1 1"); //send serial message (boom vibe)
+        else if (comet.catcher == p2)
+          print_and_write("2 1");
+          //sendPort.write("2 1"); //send serial message (boom vibe)
         comet.catcher = null;
         comet.joint.removeFromWorld();
         comet.joint = null;
-      }                 
+      }
     }
 
     if(comet.isTouchingBody(g1) && p1.gravityOn && (comet.catcher == null)){
@@ -182,16 +190,18 @@ void draw()
       } else if (win == 2){
         p2.score+=10;
       }
-
-      println(win);
-      messageTimeStamp = millis();
       println("Out");
+      print_and_write(str(win)+" 1");
+      //sendPort.write(str(win)+" 1");
+      //println(str(win)+" r");
+      messageTimeStamp = millis();
     }
 
     if(comet.isTouchingBody(p1)){
       println("Collide");
-      sendPort.write("r");
-      println("r");
+      print_and_write("1 1");
+      //sendPort.write("1 1");
+      //println("1 r");
 
       win = 2;
       p2.score+=10;
@@ -201,8 +211,9 @@ void draw()
     }
     if(comet.isTouchingBody(p2)){
       println("Collide");
-      sendPort.write("r");
-      println("r");
+      print_and_write("2 1");
+      //sendPort.write("2 1");
+      //println("2 r");
 
       win = 1;
       p1.score+=10;
@@ -217,7 +228,7 @@ void draw()
       gamestate = gameover;
     }
   } else if (gamestate == ready) {
-    background(0);
+    background(bg);
 
     if(up){
        p2.setY(p2.y-5);
@@ -233,7 +244,7 @@ void draw()
     rotate(radians(90));
 
     textSize(40);
-    text("Keep pressing button to start game", 0, 0);
+    text("Press and hold the star to start game", 0, 0);
 
     popMatrix();  
 
@@ -243,7 +254,7 @@ void draw()
     rotate(radians(270));
 
     textSize(40);
-    text("Keep pressing button to start game", 0, 0);
+    text("Press and hold the star to start game", 0, 0);
 
     popMatrix();
 
@@ -273,8 +284,9 @@ void draw()
         p1.turnOffGravity();
         p2.turnOffGravity();
 
-        sendPort.write("r");
-        println("r");
+        //sendPort.write("1 1");
+        //println("1 r");
+        print_and_write("1 1");
         reset();
       }
     }
@@ -282,11 +294,33 @@ void draw()
     if(messageTimeStamp != 0){
       if(millis() - messageTimeStamp <= 3000){
         if(win == 1){
-          textSize(60);
-          text("p1 win!", width/2, height/2);
+          pushMatrix();
+          translate(500, height/2);
+          rotate(radians(90));
+          textSize(100);
+          text("WIN!", 0, 0);
+          popMatrix();
+
+          pushMatrix();
+          translate(width-500, height/2);
+          rotate(radians(270));
+          textSize(100);
+          text("LOSE....", 0, 0);
+          popMatrix();
         } else if (win == 2){
-          textSize(60);
-          text("p2 win!", width/2, height/2);
+          pushMatrix();
+          translate(500, height/2);
+          rotate(radians(90));
+          textSize(100);
+          text("LOSE....", 0, 0);
+          popMatrix();
+
+          pushMatrix();
+          translate(width-500, height/2);
+          rotate(radians(270));
+          textSize(100);
+          text("WIN!", 0, 0);
+          popMatrix();
         }
       } else {
         messageTimeStamp = 0;
@@ -331,6 +365,41 @@ void reset()
   comet.respawn();
 }
 
+void serialEvent(Serial p){
+  Star player = null;
+  String s = p.readStringUntil(10);
+  String[] list;
+  if(s != null){
+    list = s.split(" ");
+    //println(list);
+    if(list.length != 3)
+      return;
+
+    if(int(list[0]) == 1){
+      player = p1;
+    } else if (int(list[0]) == 2){
+      player = p2;
+    }
+
+    float dist = float(list[1]);
+    if(Float.isNaN(dist))
+      return;
+    player.setY(map(dist, 2, 30, 120, height-120));
+    if(list[2].charAt(0) == '1'){
+      if(player.buttonPushed == false){
+        player.turnOnGravity();
+        player.buttonPushed = true;
+      }
+    } else {
+    if(player.buttonPushed){
+        player.buttonPushed = false;
+        player.turnOffGravity();
+      }
+    }
+  }
+}
+
+///for debug
 void keyPressed()
 {
   if(key == ' '){
@@ -366,28 +435,9 @@ void keyReleased()
   }
 }
 
-void serialEvent(Serial p){
-  String s = p.readStringUntil(10);
-  String[] list;
-  if(s != null){
-    list = s.split(" ");
-    //println(list);
-    if(list.length != 2)
-      return;
-    float temp = float(list[0]);
-    if(Float.isNaN(temp))
-      return;
-    p1.setY(map(temp, 2, 30, 120, height-120));
-    if(list[1].charAt(0) == '1'){
-      if(p1.buttonPushed == false){
-        p1.turnOnGravity();
-        p1.buttonPushed = true;
-      }
-    } else {
-      if(p1.buttonPushed){
-        p1.buttonPushed = false;
-        p1.turnOffGravity();
-      }
-    }
-  }
+void print_and_write(String s)
+{
+  sendPort.write("m "+s);
+  if(debug == true)
+    println(s);
 }

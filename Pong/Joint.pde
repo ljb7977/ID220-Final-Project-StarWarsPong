@@ -30,11 +30,11 @@ class Joint extends FRevoluteJoint{
     Star p = (Star)getBody1();
     int onTime = (int)(millis() - p.onTimeStamp);
 
-    println("onTime: "+str(onTime));
+    //println("onTime: "+str(onTime));
 
     onTime = constrain(onTime, 0, p.maxTime); //5 sec limit
     float speed = map(onTime, 0, p.maxTime, 0, 600);
-    println("speed: "+str(direction * speed));
+    //println("speed: "+str(direction * speed));
 
     setMaxMotorTorque(speed);
     setMotorSpeed(direction *speed);

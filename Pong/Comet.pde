@@ -31,8 +31,7 @@ class Comet extends FCircle{
     int rand = int(random(0, 2));
     if(rand == 0)
       rand = -1;
-    setVelocity(random(200, 300) * rand, random(-10, 10)); 
-    //setVelocity(0,0);
+    setVelocity(random(300, 400) * rand, random(-10, 10)); 
     setRotation(0);
     setAngularVelocity(0);
   }

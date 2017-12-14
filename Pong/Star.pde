@@ -1,15 +1,14 @@
 class Star extends FCircle{
-  
-  float y = height/2, energy = 400, maxenergy = 400;
+  float y = height/2, energy = 400, maxenergy = 400, force = 40;
   boolean gravityOn, buttonPushed;
   long onTimeStamp, vibeTimeStamp;
-  float force = 40;
+  int score=30;
 
-  int score=90;
+  int id;
 
   final int maxTime = 7000;
 
-  Star(int position, String name){
+  Star(int position, int id){
     super(80);
     setPosition(position, height/2);
     setFriction(0);
@@ -18,7 +17,7 @@ class Star extends FCircle{
     setStatic(true);
     setBullet(true);
     setGrabbable(false);
-    setName(name);
+    this.id = id;
     setColorHSV(180, 1, 1);
   }
 
@@ -42,10 +41,10 @@ class Star extends FCircle{
       int intensity = (int)map(onTime, 0, 7000, 100, 200);
       if(millis()-vibeTimeStamp >= interval){ //send serial vibe
         vibeTimeStamp = millis();
-        String message = "v "+ str(interval/2)+" "+str(intensity);
-        println(message);
-        if(getName().equals("star1"))
-        sendPort.write(message);
+        String message = str(this.id)+" 2 "+ str(interval/2)+" "+str(intensity);
+        print_and_write(message);
+        //println(message);
+        //sendPort.write(message);
       }
     } else {
       if(energy + 0.7 <= maxenergy)
@@ -67,8 +66,10 @@ class Star extends FCircle{
   {
     gravityOn = false;
     setColorHSV(180, 1, 1);
-    sendPort.write("s");
-    println("s");
+    print_and_write(str(this.id)+" 3");
+    //sendPort.write(str(this.id)+" ");
+    //sendPort.write("3");
+    //println("s");
   }
 
   void setColorHSV(int h, double s, double v) {
@@ -122,9 +123,9 @@ class Star extends FCircle{
 
     setFill(red, green, blue);
     
-    String message = "c "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
-    println(message);
-    if(getName().equals("star1"))
-    sendPort.write(message);
+    String message = str(this.id)+" 0 "+ str(int(red))+" "+ str(int(green))+" "+ str(int(blue));
+    //println(message);
+    //sendPort.write(message);
+    print_and_write(message);
   }
 }
