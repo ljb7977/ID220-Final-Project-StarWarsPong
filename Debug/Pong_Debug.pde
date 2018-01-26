@@ -3,7 +3,6 @@ import processing.serial.*;
 
 boolean debug = true;
 
-Serial myPort, sendPort;
 FWorld world;
 
 Gravity g1, g2;
@@ -25,7 +24,7 @@ int winscore = 50;
 
 void setup()
 {
-  fullScreen(2);
+  fullScreen(1);
   smooth();
   frameRate(60);
   bg = loadImage("bg.jpg");
@@ -40,12 +39,6 @@ void setup()
   font = createFont("SF Distant Galaxy.ttf", 64);
   textFont(font);
   textAlign(CENTER, CENTER);
-  
-  println(Serial.list());
-  
-  sendPort = new Serial(this, Serial.list()[1], 57600);
-  sendPort.clear();
-  sendPort.bufferUntil(10);
   
   Fisica.init(this);
   world = new FWorld();
@@ -75,13 +68,13 @@ void setup()
   world.add(gauge1);
   world.add(gauge2);
 
-  myPort = new Serial(this, Serial.list()[0], 57600);
-  myPort.clear();
-  myPort.bufferUntil(10);
-
   gamestate = ready;
 
-  start_match();
+  gauge1.setDrawable(false);
+  gauge2.setDrawable(false);
+  comet.setDrawable(false);
+  
+  comet.respawn();
   comet.setVelocity(0,0);
 }
 
@@ -132,15 +125,21 @@ void draw()
       return;
     }
     background(bg);
+
+    if(p1.up){
+       p1.setY(p1.y-10);
+    } else if (p1.down){
+       p1.setY(p1.y+10);
+    }
+
+    if(p2.up){
+       p2.setY(p2.y-10);
+    } else if (p2.down){
+       p2.setY(p2.y+10);
+    }
     
     if(comet.catcher != null){
       if(!comet.catcher.gravityOn){ //when the catcher is turned off
-        if(comet.catcher == p1)
-          print_and_write("1 1");
-          //sendPort.write("1 1"); //send serial message (boom vibe)
-        else if (comet.catcher == p2)
-          print_and_write("2 1");
-          //sendPort.write("2 1"); //send serial message (boom vibe)
         comet.catcher = null;
         comet.joint.removeFromWorld();
         comet.joint = null;
@@ -158,7 +157,6 @@ void draw()
       comet.joint.addToWorld(world);
       println("catched by g2");
     }
-
     
     g1.step();
     g2.step();
@@ -179,48 +177,45 @@ void draw()
 
     if((win = comet.outOfBoard()) != 0){
       if(win == 1){
-        p1.score+=10;
+        p1.getScore();
       } else if (win == 2){
-        p2.score+=10;
+        p2.getScore();
       }
       println("Out");
-      print_and_write(str(win)+" 1");
-      messageTimeStamp = millis();
     }
 
     if(comet.isTouchingBody(p1)){
       println("Collide");
-      print_and_write("1 1");
       win = 2;
-      p2.score+=10;
-
-      messageTimeStamp = millis();
-      p1.maxenergy += 10;
+      p2.getScore();
     }
     if(comet.isTouchingBody(p2)){
       println("Collide");
-      print_and_write("2 1");
-
       win = 1;
-      p1.score+=10;
-
-      messageTimeStamp = millis();
-      p2.maxenergy += 10;
+      p1.getScore();
     }
 
     printScore();
-    if(p1.score >= winscore || p2.score >=winscore){
+    if(p1.score >= winscore || p2.score >= winscore){
       messageTimeStamp = millis();
       gamestate = gameover;
     }
   } else if (gamestate == ready) {
     background(bg);
 
-    pushMatrix();
-    translate(width/2, 880);
-    rotate(radians(180));
-    image(logo, 0, 0);
-    popMatrix();
+    if(p1.up){
+       p1.setY(p1.y-10);
+    } else if (p1.down){
+       p1.setY(p1.y+10);
+    }
+
+    if(p2.up){
+       p2.setY(p2.y-10);
+    } else if (p2.down){
+       p2.setY(p2.y+10);
+    }
+
+    image(logo, width/2, 300);
 
     pushMatrix();
 
@@ -248,10 +243,6 @@ void draw()
     g1.step();
     g2.step();
 
-    gauge1.setDrawable(false);
-    gauge2.setDrawable(false);
-    comet.setDrawable(false);
-
     world.step();
     world.draw();
 
@@ -267,13 +258,12 @@ void draw()
         gamestate = main;
         p1.turnOffGravity();
         p2.turnOffGravity();
-
-        print_and_write("1 1");
       }
     }
   } else if (gamestate == gameover){
     if(messageTimeStamp != 0){
       if(millis() - messageTimeStamp <= 3000){
+
         pushMatrix();
         translate(500, height/2);
         rotate(radians(90));
@@ -296,12 +286,13 @@ void draw()
       } else {
         messageTimeStamp = 0;
         gamestate = ready;
-        p1.score = 0;
-        p2.score = 0;
         p1.maxenergy = 400;
         p2.maxenergy = 400;
-        p1.energy = p1.maxenergy;
-        p2.energy = p2.maxenergy;
+        p1.score = 0;
+        p2.score = 0;
+        gauge1.setDrawable(false);
+        gauge2.setDrawable(false);
+        comet.setDrawable(false);
         start_match();
       }
       return;
@@ -340,45 +331,68 @@ void start_match()
   comet.respawn();
 }
 
-void serialEvent(Serial p){
-  Star player = null;
-  String s = p.readStringUntil(10);
-  String[] list;
-  if(s != null){
-    list = s.split(" ");
-    println(list);
-    if(list.length != 3)
-      return;
-
-    if(int(list[0]) == 1){
-      player = p1;
-      println("p1");
-    } else if (int(list[0]) == 2){
-      player = p2;
-      println("p2");
+void keyPressed()
+{
+  if(key == ' '){
+    if(p2.buttonPushed == false){
+        p2.turnOnGravity();
+        p2.buttonPushed = true;
     }
+  }
 
-    float dist = float(list[1]);
-    if(Float.isNaN(dist))
-      return;
-    player.setY(map(dist, 2, 30, 120, height-120));
-    if(list[2].charAt(0) == '1'){
-      if(player.buttonPushed == false){
-        player.turnOnGravity();
-        player.buttonPushed = true;
-      }
-    } else {
-    if(player.buttonPushed){
-        player.buttonPushed = false;
-        player.turnOffGravity();
-      }
+  if(key == 'd'){
+    if(p1.buttonPushed == false){
+        p1.turnOnGravity();
+        p1.buttonPushed = true;
+    }
+  }
+
+  if(key == 'w'){
+    p1.up = true;
+  }
+
+  if(key == 's'){
+    p1.down = true;
+  }
+
+  if(key == CODED){
+    if(keyCode == UP){
+       p2.up = true;
+    } else if (keyCode == DOWN){
+       p2.down = true;
     }
   }
 }
 
-void print_and_write(String s)
+void keyReleased()
 {
-  sendPort.write("m "+s);
-  if(debug == true)
-    println(s);
+  if(key == ' '){
+    if(p2.buttonPushed){
+      p2.buttonPushed = false;
+      p2.turnOffGravity();
+    }
+  }
+  
+  if(key == 'd'){
+    if(p1.buttonPushed){
+      p1.buttonPushed = false;
+      p1.turnOffGravity();
+    }
+  }
+
+  if(key == 'w'){
+    p1.up = false;
+  }
+
+  if(key == 's'){
+    p1.down = false;
+  }
+
+  if(key == CODED){
+    if(keyCode == UP){
+       p2.up = false;
+    } else if (keyCode == DOWN){
+       p2.down = false;
+    }
+  }
 }
